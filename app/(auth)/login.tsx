@@ -1,59 +1,96 @@
-import { useState, FC } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const LoginScreen: FC = () => {
+import { Link } from "expo-router";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Picker } from "@react-native-picker/picker";
+
+const schema = z.object({
+  identifier: z.string().min(1, "Email atau NIM wajib diisi"),
+  role: z.enum(["admin", "user"], "Role wajib dipilih"),
+  password: z.string().min(6, "Password minimal 6 karakter"),
+});
+
+export default function LoginScreen(): React.JSX.Element {
+  const { control, handleSubmit } = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      identifier: "",
+      role: "user",
+      password: "",
+    },
+  });
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.circle} />
       <Text style={styles.title}>Mengampus</Text>
       <Text style={styles.subtitle}>Aplikasi Manajemen Acara Kampus</Text>
 
-      <Text style={styles.label}>Email / NIM</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="tes@gmail.com"
-        // value={emailOrNim}
-        autoCapitalize="none"
-        // onChangeText={setEmailOrNim}
-      />
+      <View>
+        <Text style={styles.label}>Email / NIM</Text>
+        <Controller
+          control={control}
+          name="identifier"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+              style={styles.input}
+              placeholder="Masukkan Email atau NIM"
+              autoCapitalize="none"
+            />
+          )}
+        />
+      </View>
 
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="********"
-        secureTextEntry
-        // value={password}
-        // onChangeText={setPassword}
-      />
+      <View>
+        <Text style={styles.label}>Password</Text>
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+              style={styles.input}
+              placeholder="********"
+              secureTextEntry
+            />
+          )}
+        />
+      </View>
 
-      <Text style={styles.label}>Role</Text>
-      {/*<TouchableOpacity
-            style={styles.input}
-            onPress={() => setRole((prev) => (prev === "user" ? "admin" : "user"))}
-          >
-            <Text style={{ color: "#6B7280" }}>
-              {role === "user" ? "User (Mahasiswa)" : "Admin (Panitia)"}
-            </Text>
-          </TouchableOpacity>*/}
+      <View>
+        <Text style={styles.label}>Role</Text>
+        <Controller
+          control={control}
+          name="role"
+          render={({ field: { onChange, value } }) => (
+            <Picker selectedValue={value} onValueChange={onChange}>
+              <Picker.Item label="Mahasiswa" value="user" />
+              <Picker.Item label="Admin" value="admin" />
+            </Picker>
+          )}
+        />
+      </View>
 
-      {/*<TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-            <Text style={styles.primaryButtonText}>LOGIN</Text>
-          </TouchableOpacity>
+      <Pressable style={styles.primaryButton} onPress={handleSubmit((data) => console.log(data))}>
+        <Text style={styles.primaryButtonText}>Login</Text>
+      </Pressable>
 
-          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-            <Text style={styles.bottomText}>Belum punya akun? Register</Text>
-          </TouchableOpacity>*/}
-    </View>
+      <Link href="/(auth)/register">
+        <Text style={styles.bottomText}>Belum punya akun? Register</Text>
+      </Link>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -99,5 +136,3 @@ const styles = StyleSheet.create({
   },
   bottomText: { textAlign: "center", marginTop: 16 },
 });
-
-export default LoginScreen;
