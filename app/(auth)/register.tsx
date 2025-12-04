@@ -30,7 +30,6 @@ export default function RegisterScreen(): React.JSX.Element {
   });
 
   const handleRegister = async (data: z.infer<typeof schema>) => {
-    console.log({ data });
     const response = await authClient.signUp.email({
       name: data.name,
       email: data.email,
@@ -157,7 +156,10 @@ export default function RegisterScreen(): React.JSX.Element {
         />
       </View>
 
-      <Pressable style={styles.primaryButton} onPress={handleSubmit(handleRegister)}>
+      <Pressable
+        style={styles.primaryButton}
+        onPress={handleSubmit(handleRegister)}
+      >
         <Text style={styles.primaryButtonText}>REGISTER</Text>
       </Pressable>
 
