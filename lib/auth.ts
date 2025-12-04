@@ -4,7 +4,7 @@ import { adminClient, inferAdditionalFields } from "better-auth/client/plugins";
 import * as SecureStore from "expo-secure-store";
 
 export const authClient = createAuthClient({
-  baseURL: "http://192.168.1.9:4000",
+  baseURL: "http://192.168.43.60:4000",
   plugins: [
     expoClient({
       scheme: "mengampus",
