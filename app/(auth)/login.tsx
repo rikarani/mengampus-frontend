@@ -8,6 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Picker } from "@react-native-picker/picker";
+import { authClient } from "@/lib/auth";
 
 const schema = z.object({
   identifier: z.string().min(1, "Email atau NIM wajib diisi"),
@@ -24,6 +25,20 @@ export default function LoginScreen(): React.JSX.Element {
       password: "",
     },
   });
+
+  const handleLogin = async (data: z.infer<typeof schema>) => {
+    const response = await authClient.signIn.email({
+      email: data.identifier,
+      password: data.password,
+    });
+
+    if (response.error) {
+      console.error("Login failed:", response.error);
+      return;
+    }
+
+    console.log("Login successful");
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,12 +96,19 @@ export default function LoginScreen(): React.JSX.Element {
         />
       </View>
 
-      <Pressable style={styles.primaryButton} onPress={handleSubmit((data) => console.log(data))}>
+      <Pressable
+        style={styles.primaryButton}
+        onPress={handleSubmit(handleLogin)}
+      >
         <Text style={styles.primaryButtonText}>Login</Text>
       </Pressable>
 
       <Link href="/(auth)/register">
         <Text style={styles.bottomText}>Belum punya akun? Register</Text>
+      </Link>
+
+      <Link href="/(events)">
+        <Text style={styles.bottomText}>gas liat list event</Text>
       </Link>
     </SafeAreaView>
   );
