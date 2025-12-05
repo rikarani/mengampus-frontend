@@ -1,18 +1,18 @@
-import { createContext, useContext, useState, useEffect, PropsWithChildren } from "react";
 import * as SecureStore from "expo-secure-store";
+import { createContext, PropsWithChildren, useEffect, useState } from "react";
+
+import { decodeJWT } from "@/lib/helper/decodeJWT";
 
 /* ---------- Types ---------- */
 
-export type User = {
+type User = {
   id: string;
   name: string;
   email: string;
   nim: string;
   prodi: string;
-  image: string | null;
   role: string | null;
-  created_at: string;
-  updated_at: string;
+  image: string | null;
 };
 
 type AuthContextType = {
@@ -25,7 +25,7 @@ type AuthContextType = {
 
 /* ---------- Default Context ---------- */
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   token: null,
   user: null,
   loading: true,
@@ -40,34 +40,63 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load token & user on app startup
+  /* --- Load auth state on startup --- */
   useEffect(() => {
     (async () => {
-      const storedToken = await SecureStore.getItemAsync("authToken");
-      const storedUser = await SecureStore.getItemAsync("authUser");
+      try {
+        const [storedToken, storedUser] = await Promise.all([
+          SecureStore.getItemAsync("authToken"),
+          SecureStore.getItemAsync("authUser"),
+        ]);
 
-      if (storedToken) setToken(storedToken);
-      if (storedUser) setUser(JSON.parse(storedUser));
+        // If no token → directly set loading false
+        if (!storedToken) {
+          setLoading(false);
+          return;
+        }
+
+        // Check token expired
+        const payload = decodeJWT(storedToken);
+
+        const now = Math.floor(Date.now() / 1000);
+        if (!payload || payload.exp < now) {
+          // Token expired → full logout
+          await logout();
+          setLoading(false);
+          return;
+        }
+
+        setToken(storedToken);
+
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch {
+            // corrupted data → force logout
+            await logout();
+          }
+        }
+      } catch (err) {
+        console.error("Auth load error:", err);
+        await logout();
+      }
 
       setLoading(false);
     })();
   }, []);
 
   /* ---------- Login Implementation ---------- */
-  const login = async (newToken: string, userData: User) => {
-    // Simpan ke secure store
-    await SecureStore.setItemAsync("authToken", newToken);
-    await SecureStore.setItemAsync("authUser", JSON.stringify(userData));
+  const login = async (token: string, user: User) => {
+    await SecureStore.setItemAsync("authToken", token);
+    await SecureStore.setItemAsync("authUser", JSON.stringify(user));
 
-    // Simpan ke state
-    setToken(newToken);
-    setUser(userData);
+    setToken(token);
+    setUser(user);
   };
 
   /* ---------- Logout Implementation ---------- */
   const logout = async () => {
-    await SecureStore.deleteItemAsync("authToken");
-    await SecureStore.deleteItemAsync("authUser");
+    await Promise.all([SecureStore.deleteItemAsync("authToken"), SecureStore.deleteItemAsync("authUser")]);
 
     setToken(null);
     setUser(null);
@@ -75,7 +104,3 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   return <AuthContext.Provider value={{ token, user, loading, login, logout }}>{children}</AuthContext.Provider>;
 }
-
-/* ---------- Hook ---------- */
-
-export const useAuth = () => useContext(AuthContext);
