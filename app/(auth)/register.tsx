@@ -1,14 +1,14 @@
-import { Link } from "expo-router";
-import { Pressable, Text, TextInput, View, ScrollView } from "react-native";
+import { Link, router } from "expo-router";
+import { Pressable, ScrollView, Text, TextInput, ToastAndroid, View } from "react-native";
 
-import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
-import { Picker } from "@react-native-picker/picker";
 import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
+import { Picker } from "@react-native-picker/picker";
 
-import { registerSchema, RegisterSchema } from "@/schemas/auth/register";
 import { API_HOST } from "@/constants";
+import { registerSchema, RegisterSchema } from "@/schemas/auth/register";
 
 type Prodi = {
   label: string;
@@ -53,7 +53,13 @@ export default function RegisterScreen(): React.JSX.Element {
 
     const result = await response.json();
 
-    console.log({ result });
+    if (!result.success) {
+      ToastAndroid.show(`Gagal Registrasi: ${result.data.message}`, ToastAndroid.LONG);
+      return;
+    }
+
+    ToastAndroid.show("Berhasil Registrasi! Silakan Login.", ToastAndroid.LONG);
+    router.push("/(auth)/login");
   };
 
   return (
@@ -73,7 +79,9 @@ export default function RegisterScreen(): React.JSX.Element {
                   onBlur={onBlur}
                   value={value}
                   placeholder="Masukkan Nama Lengkap"
-                  className={`px-3 py-2.5 border rounded-lg ${errors.name ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                  className={`px-3 py-2.5 border rounded-lg ${
+                    errors.name ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"
+                  }`}
                 />
                 {errors.name && <Text className="text-red-500 mt-1 text-sm">{errors.name.message}</Text>}
               </>
@@ -92,7 +100,9 @@ export default function RegisterScreen(): React.JSX.Element {
                   onBlur={onBlur}
                   value={value}
                   placeholder="pake email kampus"
-                  className={`px-3 py-2.5 border rounded-lg ${errors.email ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                  className={`px-3 py-2.5 border rounded-lg ${
+                    errors.email ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"
+                  }`}
                 />
                 {errors.email && <Text className="text-red-500 mt-1 text-sm">{errors.email.message}</Text>}
               </>
@@ -112,7 +122,9 @@ export default function RegisterScreen(): React.JSX.Element {
                   value={value}
                   placeholder="Masukkan NIM"
                   autoCapitalize="none"
-                  className={`px-3 py-2.5 border rounded-lg ${errors.nim ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                  className={`px-3 py-2.5 border rounded-lg ${
+                    errors.nim ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"
+                  }`}
                 />
                 {errors.nim && <Text className="text-red-500 mt-1 text-sm">{errors.nim.message}</Text>}
               </>
@@ -127,7 +139,9 @@ export default function RegisterScreen(): React.JSX.Element {
             render={({ field: { onChange, value } }) => (
               <>
                 <View
-                  className={`border rounded-lg ${errors.prodi ? "border-red-500 bg-red-50" : "border-slate-400 bg-slate-200"}`}
+                  className={`border rounded-lg ${
+                    errors.prodi ? "border-red-500 bg-red-50" : "border-slate-400 bg-slate-200"
+                  }`}
                 >
                   <Picker
                     mode="dialog"
@@ -163,7 +177,9 @@ export default function RegisterScreen(): React.JSX.Element {
                   value={value}
                   placeholder="********"
                   secureTextEntry
-                  className={`px-3 py-2.5 border rounded-lg ${errors.password ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                  className={`px-3 py-2.5 border rounded-lg ${
+                    errors.password ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"
+                  }`}
                 />
                 {errors.password && <Text className="text-red-500 mt-1 text-sm">{errors.password.message}</Text>}
               </>
@@ -183,7 +199,9 @@ export default function RegisterScreen(): React.JSX.Element {
                   value={value}
                   placeholder="********"
                   secureTextEntry
-                  className={`px-3 py-2.5 border rounded-lg ${errors.password_confirmation ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                  className={`px-3 py-2.5 border rounded-lg ${
+                    errors.password_confirmation ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"
+                  }`}
                 />
                 {errors.password_confirmation && (
                   <Text className="text-red-500 mt-1 text-sm">{errors.password_confirmation.message}</Text>
