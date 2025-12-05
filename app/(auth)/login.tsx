@@ -1,23 +1,25 @@
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, ToastAndroid, View } from "react-native";
 
-import { Link } from "expo-router";
-import { API_HOST } from "@/constants";
+import { Link, router } from "expo-router";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 
+import { loginSchema, LoginSchema } from "@/schemas/auth/login";
 import { Picker } from "@react-native-picker/picker";
-import { loginSchema } from "@/schemas/auth/login";
+
+import { API_HOST } from "@/constants";
+import { useAuth } from "@/hooks/useAuth";
 
 import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
 
 export default function LoginScreen(): React.JSX.Element {
+  const { login } = useAuth();
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<z.infer<typeof loginSchema>>({
+  } = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       nim: "",
@@ -26,11 +28,33 @@ export default function LoginScreen(): React.JSX.Element {
     },
   });
 
-  const handleLogin = async (data: z.infer<typeof loginSchema>) => {
-    const response = await fetch(`${API_HOST}`);
+  const handleLogin = async (data: LoginSchema) => {
+    try {
+      const response = await fetch(`${API_HOST}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-    const result = await response.json();
-    console.log({ result });
+      if (!response.ok) {
+        ToastAndroid.show(`Terjadi Kesalahan di Server`, ToastAndroid.LONG);
+        return;
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        ToastAndroid.show(`Gagal Login: ${result.data.message}`, ToastAndroid.LONG);
+        return;
+      }
+
+      await login(result.data.token, result.data.user);
+      ToastAndroid.show("Berhasil Login!", ToastAndroid.SHORT);
+      router.replace("/(events)");
+    } catch {
+      ToastAndroid.show("Gagal Login: Terjadi kesalahan jaringan", ToastAndroid.LONG);
+    }
   };
 
   return (
@@ -51,7 +75,9 @@ export default function LoginScreen(): React.JSX.Element {
                 value={value}
                 placeholder="Masukkan NIM"
                 autoCapitalize="none"
-                className={`px-3 py-2.5 border rounded-lg ${errors.nim ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                className={`px-3 py-2.5 border rounded-lg ${
+                  errors.nim ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"
+                }`}
               />
               {errors.nim && <Text className="text-red-500 mt-1 text-sm">{errors.nim.message}</Text>}
             </>
@@ -71,7 +97,9 @@ export default function LoginScreen(): React.JSX.Element {
                 value={value}
                 placeholder="********"
                 secureTextEntry
-                className={`px-3 py-2.5 border rounded-lg ${errors.password ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                className={`px-3 py-2.5 border rounded-lg ${
+                  errors.password ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"
+                }`}
               />
               {errors.password && <Text className="text-red-500 mt-1 text-sm">{errors.password.message}</Text>}
             </>
@@ -86,7 +114,9 @@ export default function LoginScreen(): React.JSX.Element {
           render={({ field: { onChange, value } }) => (
             <>
               <View
-                className={`border rounded-lg ${errors.role ? "border-red-500 bg-red-50" : "border-slate-400 bg-slate-200"}`}
+                className={`border rounded-lg ${
+                  errors.role ? "border-red-500 bg-red-50" : "border-slate-400 bg-slate-200"
+                }`}
               >
                 <Picker
                   mode="dialog"
