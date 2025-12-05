@@ -1,215 +1,208 @@
 import { Link } from "expo-router";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, Text, TextInput, View, ScrollView } from "react-native";
 
-import { authClient } from "@/lib/auth";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const schema = z.object({
-  name: z.string().min(1, "Nama lengkap wajib diisi"),
-  email: z.email("Email tidak valid"),
-  nim: z.string().min(1, "NIM wajib diisi"),
-  prodi: z.string().min(1, "Program studi wajib diisi"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
-  confirmPassword: z.string().min(6, "Konfirmasi password minimal 6 karakter"),
-});
+import { Picker } from "@react-native-picker/picker";
+import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
+
+import { registerSchema, RegisterSchema } from "@/schemas/auth/register";
+import { API_HOST } from "@/constants";
+
+type Prodi = {
+  label: string;
+  value: string;
+};
 
 export default function RegisterScreen(): React.JSX.Element {
-  const { control, handleSubmit } = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const prodis: Prodi[] = [
+    { label: "Informatika", value: "Informatika" },
+    { label: "Sistem Informasi", value: "Sistem Informasi" },
+    { label: "Teknik Komputer", value: "Teknik Komputer" },
+    { label: "Teknologi Informasi", value: "Teknologi Informasi" },
+    { label: "Rekayasa Perangkat Lunak", value: "Rekayasa Perangkat Lunak" },
+    { label: "Komputerisasi Akuntansi", value: "Komputerisasi Akuntansi" },
+    { label: "Manajemen Informatika", value: "Manajemen Informatika" },
+  ];
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterSchema>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
       nim: "",
       prodi: "",
       password: "",
-      confirmPassword: "",
+      password_confirmation: "",
     },
   });
 
-  const handleRegister = async (data: z.infer<typeof schema>) => {
-    const response = await authClient.signUp.email({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      nim: data.nim,
-      prodi: data.prodi,
+  const register = async (data: RegisterSchema) => {
+    const response = await fetch(`${API_HOST}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     });
 
-    if (response.error) {
-      console.log("hore error", response.error);
-      return;
-    }
+    const result = await response.json();
 
-    console.log("hore tidak ada error");
+    console.log({ result });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.circle} />
-      <Text style={styles.title}>Buat Akun Baru</Text>
-
-      <View>
-        <Text style={styles.label}>Nama Lengkap</Text>
-        <Controller
-          control={control}
-          name="name"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="Nama Lengkap Anda"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-      </View>
-
-      <View>
-        <Text style={styles.label}>Email</Text>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="email@student.ac.id"
-              autoCapitalize="none"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-      </View>
-
-      <View>
-        <Text style={styles.label}>NIM</Text>
-        <Controller
-          control={control}
-          name="nim"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="123456789"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-      </View>
-
-      <View>
-        <Text style={styles.label}>Program Studi</Text>
-        <Controller
-          control={control}
-          name="prodi"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="Informatika"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-      </View>
-
-      <View>
-        <Text style={styles.label}>Password</Text>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="********"
-              secureTextEntry
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-      </View>
-
-      <View>
-        <Text style={styles.label}>Konfirmasi Password</Text>
-        <Controller
-          control={control}
-          name="confirmPassword"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="********"
-              secureTextEntry
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-      </View>
-
-      <Pressable
-        style={styles.primaryButton}
-        onPress={handleSubmit(handleRegister)}
-      >
-        <Text style={styles.primaryButtonText}>REGISTER</Text>
-      </Pressable>
-
-      <Link href="/(auth)/login">
-        <Text style={styles.bottomText}>Sudah punya akun? Login</Text>
-      </Link>
-    </SafeAreaView>
+    <StyledSafeAreaView className="flex-1 p-6 pt-[60px] bg-white">
+      <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+        <View className="size-20 rounded-[40px] border-2 mb-4 self-center border-blue-500" />
+        <Text className="text-[22px] font-semibold text-center mb-4">Buat Akun Baru</Text>
+        <View className="mb-4">
+          <Text className="text-base font-medium mb-1">Nama Lengkap</Text>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="Masukkan Nama Lengkap"
+                  className={`px-3 py-2.5 border rounded-lg ${errors.name ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                />
+                {errors.name && <Text className="text-red-500 mt-1 text-sm">{errors.name.message}</Text>}
+              </>
+            )}
+          />
+        </View>
+        <View className="mb-4">
+          <Text className="text-base font-medium mb-1">Email</Text>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="pake email kampus"
+                  className={`px-3 py-2.5 border rounded-lg ${errors.email ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                />
+                {errors.email && <Text className="text-red-500 mt-1 text-sm">{errors.email.message}</Text>}
+              </>
+            )}
+          />
+        </View>
+        <View className="mb-4">
+          <Text className="text-base font-medium mb-1">NIM</Text>
+          <Controller
+            control={control}
+            name="nim"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="Masukkan NIM"
+                  autoCapitalize="none"
+                  className={`px-3 py-2.5 border rounded-lg ${errors.nim ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                />
+                {errors.nim && <Text className="text-red-500 mt-1 text-sm">{errors.nim.message}</Text>}
+              </>
+            )}
+          />
+        </View>
+        <View className="mb-4">
+          <Text className="text-base font-semibold mb-1">Program Studi</Text>
+          <Controller
+            control={control}
+            name="prodi"
+            render={({ field: { onChange, value } }) => (
+              <>
+                <View
+                  className={`border rounded-lg ${errors.prodi ? "border-red-500 bg-red-50" : "border-slate-400 bg-slate-200"}`}
+                >
+                  <Picker
+                    mode="dialog"
+                    selectedValue={value}
+                    onValueChange={onChange}
+                    dropdownIconColor={errors.prodi ? "#ef4444" : "#000"}
+                    style={{
+                      paddingHorizontal: 12,
+                      paddingVertical: 10,
+                      height: 56, // biar sama tinggi dengan TextInput
+                    }}
+                  >
+                    {prodis.map((prodi) => (
+                      <Picker.Item key={prodi.value} label={prodi.label} value={prodi.value} />
+                    ))}
+                  </Picker>
+                </View>
+                {errors.prodi && <Text className="text-red-500 mt-1 text-sm">{errors.prodi.message}</Text>}
+              </>
+            )}
+          />
+        </View>
+        <View className="mb-4">
+          <Text className="text-base font-medium mb-1">Password</Text>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="********"
+                  secureTextEntry
+                  className={`px-3 py-2.5 border rounded-lg ${errors.password ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                />
+                {errors.password && <Text className="text-red-500 mt-1 text-sm">{errors.password.message}</Text>}
+              </>
+            )}
+          />
+        </View>
+        <View className="mb-4">
+          <Text className="text-base font-medium mb-1">Konfirmasi Password</Text>
+          <Controller
+            control={control}
+            name="password_confirmation"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <>
+                <TextInput
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  placeholder="********"
+                  secureTextEntry
+                  className={`px-3 py-2.5 border rounded-lg ${errors.password_confirmation ? " border-red-400 bg-red-300" : " border-slate-400 bg-slate-200"}`}
+                />
+                {errors.password_confirmation && (
+                  <Text className="text-red-500 mt-1 text-sm">{errors.password_confirmation.message}</Text>
+                )}
+              </>
+            )}
+          />
+        </View>
+        <Pressable className="rounded-lg  mt-2 py-3 bg-slate-900" onPress={handleSubmit(register)}>
+          <Text className="text-white text-center font-semibold text-base">Daftar</Text>
+        </Pressable>
+        <Link href="/(auth)/login" asChild>
+          <Pressable>
+            <Text className="text-center text-sm mt-3 text-blue-600 font-medium">
+              Sudah Punya Akun? <Text className="font-semibold">Login</Text>
+            </Text>
+          </Pressable>
+        </Link>
+      </ScrollView>
+    </StyledSafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    paddingTop: 60,
-    backgroundColor: "#FFFFFF",
-  },
-  circle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: "#2563EB",
-    alignSelf: "center",
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  label: { fontSize: 14, marginBottom: 4 },
-  input: {
-    backgroundColor: "#E5E7EB",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 12,
-  },
-  primaryButton: {
-    backgroundColor: "#111827",
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginTop: 8,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-  bottomText: { textAlign: "center", marginTop: 16 },
-});
