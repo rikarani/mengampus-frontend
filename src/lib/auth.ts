@@ -1,11 +1,11 @@
 import * as SecureStore from "expo-secure-store";
 
-import { API_HOST } from "@/constants";
-
-import { createAuthClient } from "better-auth/react";
-import { inferAdditionalFields } from "better-auth/client/plugins";
-
 import { expoClient } from "@better-auth/expo/client";
+import { adminClient, inferAdditionalFields, usernameClient } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
+
+import { API_HOST } from "@/constants";
+import { accessControl, admin, user } from "./permission";
 
 export const auth = createAuthClient({
   baseURL: API_HOST,
@@ -24,6 +24,11 @@ export const auth = createAuthClient({
           type: "string",
         },
       },
+    }),
+    usernameClient(),
+    adminClient({
+      ac: accessControl,
+      roles: { admin, user },
     }),
   ],
 });
