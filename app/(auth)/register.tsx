@@ -7,8 +7,9 @@ import { Controller, useForm } from "react-hook-form";
 import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
 import { Picker } from "@react-native-picker/picker";
 
-import { API_HOST } from "@/constants";
 import { registerSchema, RegisterSchema } from "@/schemas/auth/register";
+
+import { auth } from "@/lib/auth";
 
 type Prodi = {
   label: string;
@@ -36,30 +37,28 @@ export default function RegisterScreen(): React.JSX.Element {
       name: "",
       email: "",
       nim: "",
-      prodi: "",
+      prodi: "Informatika",
       password: "",
       password_confirmation: "",
     },
   });
 
   const register = async (data: RegisterSchema) => {
-    const response = await fetch(`${API_HOST}/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+    const response = await auth.signUp.email({
+      name: data.name,
+      email: data.email,
+      nim: data.nim,
+      prodi: data.prodi,
+      password: data.password,
     });
 
-    const result = await response.json();
-
-    if (!result.success) {
-      ToastAndroid.show(`Gagal Registrasi: ${result.data.message}`, ToastAndroid.LONG);
+    if (response.error) {
+      ToastAndroid.show(`Gagal daftar: ${response.error.message}`, ToastAndroid.LONG);
       return;
     }
 
-    ToastAndroid.show("Berhasil Registrasi! Silakan Login.", ToastAndroid.LONG);
-    router.push("/(auth)/login");
+    ToastAndroid.show("Berhasil Registrasi! Silakan Login", ToastAndroid.LONG);
+    router.replace("/(auth)/login");
   };
 
   return (
