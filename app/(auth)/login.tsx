@@ -8,13 +8,9 @@ import { Controller, useForm } from "react-hook-form";
 import { loginSchema, LoginSchema } from "@/schemas/auth/login";
 import { Picker } from "@react-native-picker/picker";
 
-import { API_HOST } from "@/constants";
-import { useAuth } from "@/hooks/useAuth";
-
 import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
 
 export default function LoginScreen(): React.JSX.Element {
-  const { login } = useAuth();
   const {
     control,
     handleSubmit,
@@ -29,32 +25,7 @@ export default function LoginScreen(): React.JSX.Element {
   });
 
   const handleLogin = async (data: LoginSchema) => {
-    try {
-      const response = await fetch(`${API_HOST}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        ToastAndroid.show(`Terjadi Kesalahan di Server`, ToastAndroid.LONG);
-        return;
-      }
-
-      const result = await response.json();
-      if (!result.success) {
-        ToastAndroid.show(`Gagal Login: ${result.data.message}`, ToastAndroid.LONG);
-        return;
-      }
-
-      await login(result.data.token, result.data.user);
-      ToastAndroid.show("Berhasil Login!", ToastAndroid.SHORT);
-      router.replace("/(events)");
-    } catch {
-      ToastAndroid.show("Gagal Login: Terjadi kesalahan jaringan", ToastAndroid.LONG);
-    }
+    console.log({ data });
   };
 
   return (
@@ -148,7 +119,7 @@ export default function LoginScreen(): React.JSX.Element {
           </Text>
         </Pressable>
       </Link>
-      <Link href="/(events)" asChild>
+      <Link href="/event/(tabs)/my-event" asChild>
         <Pressable>
           <Text className="text-center text-sm mt-1 text-slate-600">gas liat list event</Text>
         </Pressable>
