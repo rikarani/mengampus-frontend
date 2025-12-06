@@ -2,7 +2,7 @@ import "../global.css";
 
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
+import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context";
 
 import { router, Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -23,7 +23,7 @@ export default function RootLayout() {
       if (!session) {
         router.replace("/(auth)/login");
       } else {
-        router.replace("/dashboard/profile");
+        router.replace("/event/(tabs)/my-event");
       }
     }
   }, [isPending, session]);
