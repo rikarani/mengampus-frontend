@@ -1,5 +1,5 @@
 import { Link, router } from "expo-router";
-import { Pressable, ScrollView, Text, TextInput, ToastAndroid, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -10,22 +10,25 @@ import { Picker } from "@react-native-picker/picker";
 import { registerSchema, RegisterSchema } from "@/schemas/auth/register";
 
 import { auth } from "@/lib/auth";
+import { useToast } from "heroui-native";
 
 type Prodi = {
   label: string;
   value: string;
 };
 
+const prodis: Prodi[] = [
+  { label: "Informatika", value: "Informatika" },
+  { label: "Sistem Informasi", value: "Sistem Informasi" },
+  { label: "Teknik Komputer", value: "Teknik Komputer" },
+  { label: "Teknologi Informasi", value: "Teknologi Informasi" },
+  { label: "Rekayasa Perangkat Lunak", value: "Rekayasa Perangkat Lunak" },
+  { label: "Komputerisasi Akuntansi", value: "Komputerisasi Akuntansi" },
+  { label: "Manajemen Informatika", value: "Manajemen Informatika" },
+];
+
 export default function RegisterScreen(): React.JSX.Element {
-  const prodis: Prodi[] = [
-    { label: "Informatika", value: "Informatika" },
-    { label: "Sistem Informasi", value: "Sistem Informasi" },
-    { label: "Teknik Komputer", value: "Teknik Komputer" },
-    { label: "Teknologi Informasi", value: "Teknologi Informasi" },
-    { label: "Rekayasa Perangkat Lunak", value: "Rekayasa Perangkat Lunak" },
-    { label: "Komputerisasi Akuntansi", value: "Komputerisasi Akuntansi" },
-    { label: "Manajemen Informatika", value: "Manajemen Informatika" },
-  ];
+  const { toast } = useToast();
 
   const {
     control,
@@ -53,11 +56,19 @@ export default function RegisterScreen(): React.JSX.Element {
     });
 
     if (response.error) {
-      ToastAndroid.show(`Gagal daftar: ${response.error.message}`, ToastAndroid.LONG);
+      toast.show({
+        variant: "danger",
+        label: "Registrasi Gagal",
+        description: response.error.message,
+      });
       return;
     }
 
-    ToastAndroid.show("Berhasil Registrasi! Silakan Login", ToastAndroid.LONG);
+    toast.show({
+      variant: "success",
+      label: "Registrasi Berhasil",
+      description: "Silakan login dengan akun Anda.",
+    });
     router.replace("/(auth)/login");
   };
 
