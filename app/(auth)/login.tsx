@@ -1,16 +1,20 @@
-import { Pressable, Text, TextInput, ToastAndroid, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 
-import { Link, router } from "expo-router";
+import { Link } from "expo-router";
 
+import { loginSchema, LoginSchema } from "@/schemas/auth/login";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
-import { loginSchema, LoginSchema } from "@/schemas/auth/login";
-import { Picker } from "@react-native-picker/picker";
+import { useToast } from "heroui-native";
 
 import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
 
+import { auth } from "@/lib/auth";
+
 export default function LoginScreen(): React.JSX.Element {
+  const { toast } = useToast();
+
   const {
     control,
     handleSubmit,
@@ -25,7 +29,25 @@ export default function LoginScreen(): React.JSX.Element {
   });
 
   const handleLogin = async (data: LoginSchema) => {
-    console.log({ data });
+    const response = await auth.signIn.username({
+      username: data.nim,
+      password: data.password,
+    });
+
+    if (response.error) {
+      toast.show({
+        variant: "danger",
+        label: "Gagal login",
+        description: response.error.message,
+      });
+      return;
+    }
+
+    toast.show({
+      variant: "success",
+      label: "Berhasil login",
+      description: `Welcome Back, ${response.data.user.name}!`,
+    });
   };
 
   return (
@@ -77,38 +99,6 @@ export default function LoginScreen(): React.JSX.Element {
           )}
         />
       </View>
-      <View className="mb-4">
-        <Text className="text-base font-semibold mb-1">Role</Text>
-        <Controller
-          control={control}
-          name="role"
-          render={({ field: { onChange, value } }) => (
-            <>
-              <View
-                className={`border rounded-lg ${
-                  errors.role ? "border-red-500 bg-red-50" : "border-slate-400 bg-slate-200"
-                }`}
-              >
-                <Picker
-                  mode="dialog"
-                  selectedValue={value}
-                  onValueChange={onChange}
-                  dropdownIconColor={errors.role ? "#ef4444" : "#000"}
-                  style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                    height: 56, // biar sama tinggi dengan TextInput
-                  }}
-                >
-                  <Picker.Item label="Mahasiswa" value="user" />
-                  <Picker.Item label="Admin" value="admin" />
-                </Picker>
-              </View>
-              {errors.role && <Text className="text-red-500 mt-1 text-sm">{errors.role.message}</Text>}
-            </>
-          )}
-        />
-      </View>
       <Pressable onPress={handleSubmit(handleLogin)} className="bg-slate-900 rounded-lg py-3 items-center">
         <Text className="text-white font-semibold text-base">Login</Text>
       </Pressable>
@@ -117,11 +107,6 @@ export default function LoginScreen(): React.JSX.Element {
           <Text className="text-center text-sm mt-3 text-blue-600 font-medium">
             Belum punya akun? <Text className="font-semibold">Register</Text>
           </Text>
-        </Pressable>
-      </Link>
-      <Link href="/event/(tabs)/my-event" asChild>
-        <Pressable>
-          <Text className="text-center text-sm mt-1 text-slate-600">gas liat list event</Text>
         </Pressable>
       </Link>
     </StyledSafeAreaView>
