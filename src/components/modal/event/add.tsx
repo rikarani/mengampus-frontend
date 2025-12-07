@@ -93,166 +93,164 @@ export const AddEventModal = () => {
         </Dialog.Trigger>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-black/40" />
-          <KeyboardAvoidingView behavior="padding">
-            <SafeAreaView>
-              <Dialog.Content className="bg-white p-6 rounded-2xl shadow-lg">
-                <Dialog.Label className="text-xl font-semibold text-black mb-4">Tambah Event</Dialog.Label>
-                <View className="mb-4">
-                  <TextField className="mb-1">
-                    <Text className="text-black mb-1">Judul Event</Text>
-                    <Controller
-                      control={control}
-                      name="name"
-                      render={({ field: { onBlur, onChange, value } }) => (
-                        <TextInput
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
-                          placeholder="Masukkan nama event"
-                          className="px-3 py-3 border border-gray-300 rounded-xl bg-gray-100 text-black"
-                        />
-                      )}
-                    />
-                  </TextField>
-                  <ErrorView isInvalid={!!errors?.name}>{errors?.name?.message}</ErrorView>
-                </View>
-                <View className="mb-4">
-                  <TextField className="mb-1">
-                    <Text className="text-black mb-1">Tanggal Event</Text>
-                    <Controller
-                      control={control}
-                      name="date"
-                      render={({ field: { onChange, value } }) => (
-                        <>
-                          <Pressable
-                            onPress={() => setShowDatePicker(true)}
-                            className="flex-row items-center border border-gray-300 rounded-xl px-3 py-3 bg-gray-100"
-                          >
-                            <Text className="flex-1 text-black">
-                              {value ? dateFormatter(new Date(value)) : "Pilih tanggal"}
-                            </Text>
-                            <AntDesign name="calendar" size={22} color="black" />
-                          </Pressable>
-                          {showDatePicker && (
-                            <DateTimePicker
-                              mode="date"
-                              display="default"
-                              value={value ? new Date(value) : new Date()}
-                              onChange={(event, date) => {
-                                setShowDatePicker(false);
-                                if (event.type !== "dismissed") {
-                                  onChange(date?.toLocaleDateString("en-CA"));
-                                }
-                              }}
-                            />
-                          )}
-                        </>
-                      )}
-                    />
-                  </TextField>
-                  <ErrorView isInvalid={!!errors?.date}>{errors?.date?.message}</ErrorView>
-                </View>
-                <View className="mb-4">
-                  <TextField className="mb-1">
-                    <Text className="text-black mb-1">Waktu Event</Text>
-                    <Controller
-                      control={control}
-                      name="time"
-                      render={({ field: { onChange, value } }) => (
-                        <>
-                          <Pressable
-                            onPress={() => setShowTimePicker(true)}
-                            className="flex-row items-center border border-gray-300 rounded-xl px-3 py-3 bg-gray-100"
-                          >
-                            <Text className="flex-1 text-black">{value ? value : "Pilih waktu"}</Text>
-                            <AntDesign name="clock-circle" size={24} color="black" />
-                          </Pressable>
-                          {showTimePicker && (
-                            <DateTimePicker
-                              mode="time"
-                              display="default"
-                              value={value ? new Date(value) : new Date()}
-                              onChange={(event, date) => {
-                                setShowTimePicker(false);
-                                if (event.type !== "dismissed") {
-                                  onChange(setTime(date!));
-                                }
-                              }}
-                            />
-                          )}
-                        </>
-                      )}
-                    />
-                  </TextField>
-                  <ErrorView isInvalid={!!errors?.time}>{errors?.time?.message}</ErrorView>
-                </View>
-                <View className="mb-4">
-                  <TextField className="mb-1">
-                    <Text className="text-black mb-1">Kategori Event</Text>
-                    <Controller
-                      control={control}
-                      name="category_id"
-                      render={({ field: { onChange, value } }) => (
-                        <View className="border px-1 border-gray-300 rounded-xl bg-gray-100">
-                          <Picker selectedValue={value} onValueChange={onChange} dropdownIconColor="#000">
-                            <Picker.Item label="Pilih kategori" value="" enabled={false} />
-                            {categories.map((category) => (
-                              <Picker.Item key={category.id} label={category.name} value={category.id} />
-                            ))}
-                          </Picker>
-                        </View>
-                      )}
-                    />
-                  </TextField>
-                  <ErrorView isInvalid={!!errors?.category_id}>{errors?.category_id?.message}</ErrorView>
-                </View>
-                <View className="mb-4">
-                  <TextField className="mb-1">
-                    <Text className="text-black mb-1">Deskripsi</Text>
-                    <Controller
-                      control={control}
-                      name="description"
-                      render={({ field: { onBlur, onChange, value } }) => (
-                        <TextInput
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
-                          placeholder="Masukkan deskripsi"
-                          multiline
-                          className="px-3 py-3 border border-gray-300 rounded-xl bg-gray-100 text-black"
-                        />
-                      )}
-                    />
-                  </TextField>
-                  <ErrorView isInvalid={!!errors?.description}>{errors?.description?.message}</ErrorView>
-                </View>
-                <View className="mb-4">
-                  <TextField className="mb-1">
-                    <Text className="text-black mb-1">Lokasi</Text>
-                    <Controller
-                      control={control}
-                      name="location"
-                      render={({ field: { onBlur, onChange, value } }) => (
-                        <TextInput
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
-                          placeholder="Masukkan lokasi"
-                          className="px-3 py-3 border border-gray-300 rounded-xl bg-gray-100 text-black"
-                        />
-                      )}
-                    />
-                    <ErrorView isInvalid={!!errors?.location}>{errors?.location?.message}</ErrorView>
-                  </TextField>
-                </View>
-                <View className="flex-row justify-end mt-2">
-                  <Button onPress={handleSubmit((data) => addEvent(data))} size="sm">
-                    Gaskann
-                  </Button>
-                </View>
-              </Dialog.Content>
-            </SafeAreaView>
-          </KeyboardAvoidingView>
+          <SafeAreaView>
+            <Dialog.Content className="bg-white p-6 rounded-2xl shadow-lg">
+              <Dialog.Label className="text-xl font-semibold text-black mb-4">Tambah Event</Dialog.Label>
+              <View className="mb-4">
+                <TextField className="mb-1">
+                  <Text className="text-black mb-1">Judul Event</Text>
+                  <Controller
+                    control={control}
+                    name="name"
+                    render={({ field: { onBlur, onChange, value } }) => (
+                      <TextInput
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Masukkan nama event"
+                        className="px-3 py-3 border border-gray-300 rounded-xl bg-gray-100 text-black"
+                      />
+                    )}
+                  />
+                </TextField>
+                <ErrorView isInvalid={!!errors?.name}>{errors?.name?.message}</ErrorView>
+              </View>
+              <View className="mb-4">
+                <TextField className="mb-1">
+                  <Text className="text-black mb-1">Tanggal Event</Text>
+                  <Controller
+                    control={control}
+                    name="date"
+                    render={({ field: { onChange, value } }) => (
+                      <>
+                        <Pressable
+                          onPress={() => setShowDatePicker(true)}
+                          className="flex-row items-center border border-gray-300 rounded-xl px-3 py-3 bg-gray-100"
+                        >
+                          <Text className="flex-1 text-black">
+                            {value ? dateFormatter(new Date(value)) : "Pilih tanggal"}
+                          </Text>
+                          <AntDesign name="calendar" size={22} color="black" />
+                        </Pressable>
+                        {showDatePicker && (
+                          <DateTimePicker
+                            mode="date"
+                            display="default"
+                            value={value ? new Date(value) : new Date()}
+                            onChange={(event, date) => {
+                              setShowDatePicker(false);
+                              if (event.type !== "dismissed") {
+                                onChange(date?.toLocaleDateString("en-CA"));
+                              }
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+                  />
+                </TextField>
+                <ErrorView isInvalid={!!errors?.date}>{errors?.date?.message}</ErrorView>
+              </View>
+              <View className="mb-4">
+                <TextField className="mb-1">
+                  <Text className="text-black mb-1">Waktu Event</Text>
+                  <Controller
+                    control={control}
+                    name="time"
+                    render={({ field: { onChange, value } }) => (
+                      <>
+                        <Pressable
+                          onPress={() => setShowTimePicker(true)}
+                          className="flex-row items-center border border-gray-300 rounded-xl px-3 py-3 bg-gray-100"
+                        >
+                          <Text className="flex-1 text-black">{value ? value : "Pilih waktu"}</Text>
+                          <AntDesign name="clock-circle" size={24} color="black" />
+                        </Pressable>
+                        {showTimePicker && (
+                          <DateTimePicker
+                            mode="time"
+                            display="default"
+                            value={value ? new Date(value) : new Date()}
+                            onChange={(event, date) => {
+                              setShowTimePicker(false);
+                              if (event.type !== "dismissed") {
+                                onChange(setTime(date!));
+                              }
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+                  />
+                </TextField>
+                <ErrorView isInvalid={!!errors?.time}>{errors?.time?.message}</ErrorView>
+              </View>
+              <View className="mb-4">
+                <TextField className="mb-1">
+                  <Text className="text-black mb-1">Kategori Event</Text>
+                  <Controller
+                    control={control}
+                    name="category_id"
+                    render={({ field: { onChange, value } }) => (
+                      <View className="border px-1 border-gray-300 rounded-xl bg-gray-100">
+                        <Picker selectedValue={value} onValueChange={onChange} dropdownIconColor="#000">
+                          <Picker.Item label="Pilih kategori" value="" enabled={false} />
+                          {categories.map((category) => (
+                            <Picker.Item key={category.id} label={category.name} value={category.id} />
+                          ))}
+                        </Picker>
+                      </View>
+                    )}
+                  />
+                </TextField>
+                <ErrorView isInvalid={!!errors?.category_id}>{errors?.category_id?.message}</ErrorView>
+              </View>
+              <View className="mb-4">
+                <TextField className="mb-1">
+                  <Text className="text-black mb-1">Deskripsi</Text>
+                  <Controller
+                    control={control}
+                    name="description"
+                    render={({ field: { onBlur, onChange, value } }) => (
+                      <TextInput
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Masukkan deskripsi"
+                        multiline
+                        className="px-3 py-3 border border-gray-300 rounded-xl bg-gray-100 text-black"
+                      />
+                    )}
+                  />
+                </TextField>
+                <ErrorView isInvalid={!!errors?.description}>{errors?.description?.message}</ErrorView>
+              </View>
+              <View className="mb-4">
+                <TextField className="mb-1">
+                  <Text className="text-black mb-1">Lokasi</Text>
+                  <Controller
+                    control={control}
+                    name="location"
+                    render={({ field: { onBlur, onChange, value } }) => (
+                      <TextInput
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        placeholder="Masukkan lokasi"
+                        className="px-3 py-3 border border-gray-300 rounded-xl bg-gray-100 text-black"
+                      />
+                    )}
+                  />
+                  <ErrorView isInvalid={!!errors?.location}>{errors?.location?.message}</ErrorView>
+                </TextField>
+              </View>
+              <View className="flex-row justify-end mt-2">
+                <Button onPress={handleSubmit((data) => addEvent(data))} size="sm">
+                  Gaskann
+                </Button>
+              </View>
+            </Dialog.Content>
+          </SafeAreaView>
         </Dialog.Portal>
       </Dialog>
     </View>
