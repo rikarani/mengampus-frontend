@@ -6,7 +6,7 @@ import { Redirect, Tabs } from "expo-router";
 import { auth } from "@/lib/auth";
 
 import { ProfileButton } from "@/components/profile";
-import { AddEventModal } from "@/components/add-event";
+import { AddEventModal } from "@/components/modal/event/add";
 
 export default function EventLayout(): React.JSX.Element {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
