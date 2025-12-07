@@ -3,11 +3,10 @@ import { View } from "react-native";
 
 import { Redirect, Tabs } from "expo-router";
 
-import AntDesign from "@expo/vector-icons/AntDesign";
-
 import { auth } from "@/lib/auth";
 
 import { ProfileButton } from "@/components/profile";
+import { AddEventModal } from "@/components/add-event";
 
 export default function EventLayout(): React.JSX.Element {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -45,7 +44,7 @@ export default function EventLayout(): React.JSX.Element {
           title: "All Events",
           headerRight: () => (
             <View className="flex flex-row gap-4 items-center">
-              {hasPermission && <AntDesign name="plus-circle" size={32} color="black" />}
+              {hasPermission && <AddEventModal />}
               <ProfileButton />
             </View>
           ),
