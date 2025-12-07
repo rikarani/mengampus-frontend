@@ -2,6 +2,7 @@ import { Picker } from "@react-native-picker/picker";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
 import AntDesign from "@expo/vector-icons/AntDesign";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -10,19 +11,11 @@ import { addEventSchema, type AddEventSchema } from "@/schemas/event/add";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
-import { Button, Dialog, ErrorView, TextField } from "heroui-native";
+import { Button, Dialog, ErrorView, TextField, useToast } from "heroui-native";
 
 import { API_HOST } from "@/constants";
-import { dateFormatter, timeFormatter } from "@/lib/formatter";
+import { dateFormatter } from "@/lib/formatter";
 import type { Category } from "@/types";
-
-const setDate = (date: Date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth() > 10 ? `${date.getMonth() + 1}` : `0${date.getMonth() + 1}`;
-  const day = date.getDate() > 10 ? date.getDate() : `0${date.getDate()}`;
-
-  return `${year}-${month}-${day}`;
-};
 
 const setTime = (date: Date) => {
   const hour = String(date.getHours()).padStart(2, "0");
@@ -31,6 +24,7 @@ const setTime = (date: Date) => {
 };
 
 export const AddEventModal = () => {
+  const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -50,18 +44,46 @@ export const AddEventModal = () => {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<AddEventSchema>({
     resolver: zodResolver(addEventSchema),
     defaultValues: {
+      category_id: "",
       name: "",
       date: "",
       time: "",
-      category: "",
       description: "",
       location: "",
     },
   });
+
+  const addEvent = async (data: AddEventSchema) => {
+    const hit = await fetch(`${API_HOST}/events/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!hit.ok) {
+      toast.show({
+        variant: "danger",
+        label: "Gagal Menambahkan Event",
+        description: "Terjadi kesalahan saat menambahkan event",
+      });
+    } else {
+      toast.show({
+        variant: "success",
+        label: "Berhasil Menambahkan Event",
+        description: "Event berhasil ditambahkan",
+      });
+
+      reset();
+      setIsOpen(false);
+    }
+  };
 
   return (
     <View>
@@ -142,9 +164,7 @@ export const AddEventModal = () => {
                             onPress={() => setShowTimePicker(true)}
                             className="flex-row items-center border border-gray-300 rounded-xl px-3 py-3 bg-gray-100"
                           >
-                            <Text className="flex-1 text-black">
-                              {value ? timeFormatter(new Date(value)) : "Pilih waktu"}
-                            </Text>
+                            <Text className="flex-1 text-black">{value ? value : "Pilih waktu"}</Text>
                             <AntDesign name="clock-circle" size={24} color="black" />
                           </Pressable>
                           {showTimePicker && (
@@ -171,10 +191,11 @@ export const AddEventModal = () => {
                     <Text className="text-black mb-1">Kategori Event</Text>
                     <Controller
                       control={control}
-                      name="category"
+                      name="category_id"
                       render={({ field: { onChange, value } }) => (
                         <View className="border px-1 border-gray-300 rounded-xl bg-gray-100">
                           <Picker selectedValue={value} onValueChange={onChange} dropdownIconColor="#000">
+                            <Picker.Item label="Pilih kategori" value="" enabled={false} />
                             {categories.map((category) => (
                               <Picker.Item key={category.id} label={category.name} value={category.id} />
                             ))}
@@ -183,7 +204,7 @@ export const AddEventModal = () => {
                       )}
                     />
                   </TextField>
-                  <ErrorView isInvalid={!!errors?.category}>{errors?.category?.message}</ErrorView>
+                  <ErrorView isInvalid={!!errors?.category_id}>{errors?.category_id?.message}</ErrorView>
                 </View>
                 <View className="mb-4">
                   <TextField className="mb-1">
@@ -225,7 +246,7 @@ export const AddEventModal = () => {
                   </TextField>
                 </View>
                 <View className="flex-row justify-end mt-2">
-                  <Button onPress={handleSubmit((data) => console.log({ data }))} size="sm">
+                  <Button onPress={handleSubmit((data) => addEvent(data))} size="sm">
                     Gaskann
                   </Button>
                 </View>
