@@ -1,20 +1,23 @@
-import { Picker } from "@react-native-picker/picker";
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AntDesign from "@expo/vector-icons/AntDesign";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
 
-import { addEventSchema, type AddEventSchema } from "@/schemas/event/add";
+import AntDesign from "@expo/vector-icons/AntDesign";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
 import { Button, Dialog, ErrorView, TextField, useToast } from "heroui-native";
 
 import { API_HOST } from "@/constants";
+import { auth } from "@/lib/auth";
 import { dateFormatter } from "@/lib/formatter";
+import { addEventSchema } from "@/schemas/event/add";
 
+import type { AddEventSchema } from "@/schemas/event/add";
 import type { Category } from "@/types";
 
 const setTime = (date: Date) => {
@@ -33,7 +36,12 @@ export const AddEventModal = () => {
 
   useEffect(() => {
     (async () => {
-      const response = await fetch(`${API_HOST}/categories`);
+      const response = await fetch(`${API_HOST}/categories`, {
+        credentials: "omit",
+        headers: {
+          Cookie: auth.getCookie(),
+        },
+      });
 
       const data = await response.json();
 
