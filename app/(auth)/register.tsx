@@ -1,16 +1,19 @@
+import { useRef } from "react";
+import { KeyboardAvoidingView, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+
 import { Link, router } from "expo-router";
-import { Pressable, ScrollView, Text, TextInput, View, KeyboardAvoidingView } from "react-native";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
-import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
 import { Picker } from "@react-native-picker/picker";
 
-import { registerSchema, RegisterSchema } from "@/schemas/auth/register";
+import { useToast } from "heroui-native";
 
 import { auth } from "@/lib/auth";
-import { useToast } from "heroui-native";
+import { registerSchema, RegisterSchema } from "@/schemas/auth/register";
+
+import { StyledSafeAreaView } from "@/components/styled/StyledSafeAreaView";
 
 type Prodi = {
   label: string;
@@ -28,6 +31,13 @@ const prodis: Prodi[] = [
 ];
 
 export default function RegisterScreen(): React.JSX.Element {
+  const nameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const nimRef = useRef<TextInput>(null);
+  const prodiRef = useRef<Picker<string>>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const passwordConfirmationRef = useRef<TextInput>(null);
+
   const { toast } = useToast();
 
   const {
@@ -61,6 +71,7 @@ export default function RegisterScreen(): React.JSX.Element {
         label: "Registrasi Gagal",
         description: response.error.message,
       });
+
       return;
     }
 
@@ -69,6 +80,7 @@ export default function RegisterScreen(): React.JSX.Element {
       label: "Registrasi Berhasil",
       description: "Silakan login dengan akun Anda.",
     });
+
     router.replace("/(auth)/login");
   };
 
@@ -86,7 +98,10 @@ export default function RegisterScreen(): React.JSX.Element {
               render={({ field: { onChange, onBlur, value } }) => (
                 <>
                   <TextInput
+                    ref={nameRef}
+                    returnKeyType="next"
                     onChangeText={onChange}
+                    onSubmitEditing={() => emailRef.current?.focus()}
                     onBlur={onBlur}
                     value={value}
                     placeholder="Masukkan Nama Lengkap"
@@ -107,7 +122,11 @@ export default function RegisterScreen(): React.JSX.Element {
               render={({ field: { onChange, onBlur, value } }) => (
                 <>
                   <TextInput
+                    ref={emailRef}
+                    returnKeyType="next"
+                    keyboardType="email-address"
                     onChangeText={onChange}
+                    onSubmitEditing={() => nimRef.current?.focus()}
                     onBlur={onBlur}
                     value={value}
                     placeholder="pake email kampus"
@@ -128,7 +147,10 @@ export default function RegisterScreen(): React.JSX.Element {
               render={({ field: { onChange, onBlur, value } }) => (
                 <>
                   <TextInput
+                    ref={nimRef}
+                    returnKeyType="next"
                     onChangeText={onChange}
+                    onSubmitEditing={() => prodiRef.current?.focus()}
                     onBlur={onBlur}
                     value={value}
                     placeholder="Masukkan NIM"
@@ -155,9 +177,13 @@ export default function RegisterScreen(): React.JSX.Element {
                     }`}
                   >
                     <Picker
+                      ref={prodiRef}
                       mode="dialog"
                       selectedValue={value}
-                      onValueChange={onChange}
+                      onValueChange={(value) => {
+                        onChange(value);
+                        passwordRef.current?.focus();
+                      }}
                       dropdownIconColor={errors.prodi ? "#ef4444" : "#000"}
                       style={{
                         paddingHorizontal: 12,
@@ -183,7 +209,10 @@ export default function RegisterScreen(): React.JSX.Element {
               render={({ field: { onChange, onBlur, value } }) => (
                 <>
                   <TextInput
+                    ref={passwordRef}
+                    returnKeyType="next"
                     onChangeText={onChange}
+                    onSubmitEditing={() => passwordConfirmationRef.current?.focus()}
                     onBlur={onBlur}
                     value={value}
                     placeholder="********"
@@ -205,6 +234,8 @@ export default function RegisterScreen(): React.JSX.Element {
               render={({ field: { onChange, onBlur, value } }) => (
                 <>
                   <TextInput
+                    returnKeyType="done"
+                    ref={passwordConfirmationRef}
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
