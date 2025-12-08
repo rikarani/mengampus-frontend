@@ -10,6 +10,7 @@ export const registerSchema = z
     password_confirmation: z.string().min(8, "Konfirmasi password minimal 8 karakter"),
   })
   .refine((data) => data.password === data.password_confirmation, {
+    path: ["password_confirmation"],
     message: "Konfirmasi Password Tidak Sama",
   });
 
