@@ -5,6 +5,8 @@ import { View } from "react-native";
 import { Button, Dialog, useToast } from "heroui-native";
 
 import { API_HOST } from "@/constants";
+import { auth } from "@/lib/auth";
+
 import type { Event } from "@/types";
 
 type Props = {
@@ -17,22 +19,26 @@ export const DeleteEvent = ({ event }: Props) => {
 
   const handleDelete = async () => {
     const hit = await fetch(`${API_HOST}/events/delete/${event.id}`, {
-      method: "POST",
+      method: "DELETE",
+      credentials: "omit",
       headers: {
         "Content-Type": "application/json",
+        Cookie: auth.getCookie(),
       },
     });
+
+    const response = await hit.json();
 
     if (!hit.ok) {
       toast.show({
         variant: "danger",
-        label: "Gagal Hapus Event",
-        description: "Terjadi kesalahan saat menghapus event.",
+        label: "Error Server",
+        description: `${response.errorCode} - ${response.message}`,
       });
     } else {
       toast.show({
         variant: "success",
-        label: "Berhasil Hapus Event",
+        label: "Sukses",
         description: `Event ${event.name} berhasil dihapus.`,
       });
     }
